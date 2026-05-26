@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Técnico Avanzado · Modo Práctica</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #1e293b;
+            user-select: none;
+        }
+
+        /* Contenedor principal */
+        .quiz-wrapper {
+            width: 100%;
+            max-width: 800px;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 20, 40, 0.06);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra de progreso */
+        .progress-section {
+            padding: 20px 30px 10px;
+            background: #ffffff;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .progress-counter {
+            font-size: 1rem;
+            letter-spacing: 0.3px;
+        }
+
+        .progress-percent {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            border-radius: 20px;
+            transition: width 0.35s ease;
+        }
+
+        /* Cuerpo del cuestionario */
+        .quiz-body {
+            padding: 15px 30px 30px;
+        }
+
+        .question-card {
+            background: #f8fafc;
+            border: 1px solid #e9eef3;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 28px;
+            color: #0f172a;
+        }
+
+        /* Opciones */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: #ffffff;
+            border: 2px solid #d1d9e6;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1e293b;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            word-break: break-word;
+        }
+
+        .option-btn:hover:not(.disabled-option) {
+            border-color: #94a3b8;
+            background: #f1f5f9;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+            transform: translateY(-1px);
+        }
+
+        .option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #eef2ff;
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .option-btn.correct-choice {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #14532d;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+        }
+
+        .option-btn.correct-choice .option-letter {
+            background: #22c55e;
+            color: white;
+        }
+
+        .option-btn.wrong-choice {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #7f1d1d;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .option-btn.wrong-choice .option-letter {
+            background: #ef4444;
+            color: white;
+        }
+
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+
+        /* Bloque de retroalimentación */
+        .feedback-panel {
+            background: #fef9c3;
+            border-left: 5px solid #eab308;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-top: 10px;
+            font-size: 0.98rem;
+            color: #422006;
+            line-height: 1.5;
+        }
+
+        .feedback-panel strong {
+            color: #854d0e;
+        }
+
+        /* Navegación */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 12px 28px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            background: #f1f5f9;
+        }
+
+        .nav-btn.primary {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        .nav-btn.primary:hover:not(:disabled) {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        /* Pantalla de resultados */
+        .result-screen {
+            padding: 40px 30px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-screen.active {
+            display: block;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+
+        .result-score {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #2563eb;
+            margin: 15px 0;
+        }
+
+        .result-detail {
+            font-size: 1.1rem;
+            color: #475569;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: #0f172a;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 32px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .restart-btn:hover {
+            background: #1e293b;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-body {
+                padding: 10px 15px 20px;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option-btn {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-wrapper" id="quizContainer">
+        <!-- Sección de progreso -->
+        <div class="progress-section">
+            <div class="progress-info">
+                <span class="progress-counter" id="progressText">Pregunta 0 de 0</span>
+                <span class="progress-percent" id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Cuerpo dinámico del cuestionario -->
+        <div class="quiz-body" id="quizBody">
+            <div class="question-card" id="questionCard">
+                <div class="question-text" id="questionText"></div>
+                <div class="options-grid" id="optionsContainer"></div>
+                <div id="feedbackContainer" class="hidden"></div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prevBtn" disabled>← Anterior</button>
+                <button class="nav-btn primary" id="nextBtn">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Pantalla de resultados (oculta por defecto) -->
+        <div class="result-screen" id="resultScreen">
+            <div class="result-title">📊 Resultado final</div>
+            <div class="result-score" id="finalScore">0/0</div>
+            <div class="result-detail" id="finalPercent">0% de aciertos</div>
+            <button class="restart-btn" id="restartBtn">🔄 Reiniciar cuestionario</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ----------------------------------------------
+            // 1. SEGURIDAD: BLOQUEO DE INSPECCIÓN
+            // ----------------------------------------------
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', function(e) {
+                // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, etc.
+                if (
+                    e.keyCode === 123 ||
+                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+                    (e.ctrlKey && e.keyCode === 85)
+                ) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // ----------------------------------------------
+            // 2. BANCO DE PREGUNTAS (20 preguntas técnicas)
+            // ----------------------------------------------
+            const questionBank = [{
+                question: "Un técnico debe realizar un diagnóstico rápido en una aplicación cuya interfaz le es desconocida. ¿Qué elemento de la GUI debería priorizar para hallar herramientas de resolución?",
+                options: [
+                    "Utilizar la barra de acceso rápido para buscar utilidades.",
+                    "Abrir los menús contextuales para hallar diagnósticos.",
+                    "Acceder a las cintas de opciones para localizar errores.",
+                    "Desacoplar paneles de tareas para monitorear procesos.",
+                    "Revisar las plantillas del sistema para auditar fallos."
+                ],
+                correctAnswerText: "Abrir los menús contextuales para hallar diagnósticos.",
+                justification: "El material indica que el 70% de las funciones de diagnóstico rápido residen en los menús contextuales, los cuales son frecuentemente ignorados por el usuario promedio."
+            }, {
+                question: "Al desarrollar un script de automatización que debe ejecutarse en múltiples estaciones de trabajo, ¿qué tipo de direccionamiento garantiza la integridad del proceso?",
+                options: [
+                    "Configurar rutas absolutas para asegurar la fijeza.",
+                    "Establecer rutas relativas para asegurar movilidad.",
+                    "Definir rutas de red para asegurar la conectividad.",
+                    "Implementar rutas lógicas para asegurar la indexación.",
+                    "Asignar rutas virtuales para asegurar el aislamiento."
+                ],
+                correctAnswerText: "Establecer rutas relativas para asegurar movilidad.",
+                justification: "Las rutas relativas son obligatorias para scripts y software portable, ya que evitan que el proceso se rompa al cambiar de equipo o directorio raíz."
+            }, {
+                question: "Se requiere realizar el despliegue de un paquete MSI en 500 equipos de forma simultánea sin intervención del usuario. ¿Qué parámetro técnico es el adecuado?",
+                options: [
+                    "Ejecutar el instalador mediante el comando /verify.",
+                    "Iniciar el instalador mediante el comando /update.",
+                    "Lanzar el instalador mediante el comando /silent.",
+                    "Programar el instalador mediante el comando /extract.",
+                    "Validar el instalador mediante el comando /config."
+                ],
+                correctAnswerText: "Lanzar el instalador mediante el comando /silent.",
+                justification: "Los parámetros /quiet o /silent son específicos para la automatización corporativa en instalaciones masivas desatendidas."
+            }, {
+                question: "¿Por qué el proceso de mover una carpeta de 50GB es casi instantáneo cuando se realiza dentro de la misma partición de un disco duro?",
+                options: [
+                    "El sistema duplica los bloques lógicos en el registro.",
+                    "El sistema elimina los archivos físicos en el origen.",
+                    "El sistema actualiza la referencia lógica en el índice.",
+                    "El sistema comprime los datos físicos en el destino.",
+                    "El sistema transfiere los bits lógicos hacia la RAM."
+                ],
+                correctAnswerText: "El sistema actualiza la referencia lógica en el índice.",
+                justification: "Al mover archivos en la misma partición, no hay desplazamiento físico de datos; solo se modifica el índice (tabla de asignación) del sistema de archivos."
+            }, {
+                question: "Un software de edición de video profesional sufre colapsos constantes durante el renderizado. ¿Qué ajuste de 'Preferencias del Sistema' debe auditarse primero?",
+                options: [
+                    "Verificar el autoguardado para prevenir la pérdida.",
+                    "Analizar la asignación de RAM para prevenir colapsos.",
+                    "Revisar el mapeo de teclas para prevenir conflictos.",
+                    "Validar la ruta de instalación para prevenir errores.",
+                    "Ajustar la identidad visual para prevenir bloqueos."
+                ],
+                correctAnswerText: "Analizar la asignación de RAM para prevenir colapsos.",
+                justification: "La asignación de memoria RAM es vital en software de edición pesada para evitar fallos sistémicos durante procesos de alta carga."
+            }, {
+                question: "Durante la fase de ejecución de una instalación, el sistema devuelve un error de permisos. ¿Cuál es el diagnóstico técnico correcto según el pipeline de despliegue?",
+                options: [
+                    "Fallo en la verificación de dependencias de Visual C++.",
+                    "Error en la aceptación del contrato de licencia EULA.",
+                    "Falta de privilegios de administrador para el binario.",
+                    "Ausencia de espacio físico en la carpeta Program Files.",
+                    "Corrupción de los índices lógicos en la tabla maestra."
+                ],
+                correctAnswerText: "Falta de privilegios de administrador para el binario.",
+                justification: "El paso 1 (Ejecución) del proceso de instalación se centra específicamente en el lanzamiento del ejecutable y la verificación de permisos de administrador."
+            }, {
+                question: "La interfaz gráfica de un programa crítico se ha corrompido y no permite el acceso al menú de ajustes. ¿Qué acción técnica permite recuperar la funcionalidad?",
+                options: [
+                    "Reinstalar el paquete de archivos .dat y .assets.",
+                    "Registrar las librerías .dll mediante el regsvr32.",
+                    "Editar los archivos de configuración en texto plano.",
+                    "Borrar los archivos temporales de auditoría .log.",
+                    "Modificar los scripts de inicio en formato binario."
+                ],
+                correctAnswerText: "Editar los archivos de configuración en texto plano.",
+                justification: "Editar manualmente archivos .ini, .xml o .json con editores de texto plano permite corregir parámetros antes de cargar los gráficos."
+            }, {
+                question: "En un entorno de producción de alta seguridad, ¿por qué se debe prohibir estrictamente la 'Instalación Típica' de cualquier paquete de software?",
+                options: [
+                    "Porque el instalador omite la creación de accesos.",
+                    "Porque el instalador sobrecarga la memoria de RAM.",
+                    "Porque el instalador incluye software no deseado.",
+                    "Porque el instalador ignora los contratos de EULA.",
+                    "Porque el instalador altera los índices del sistema."
+                ],
+                correctAnswerText: "Porque el instalador incluye software no deseado.",
+                justification: "La instalación típica conlleva el riesgo de instalar bloatware (software basura) y publicidad, comprometiendo la seguridad y limpieza del sistema."
+            }, {
+                question: "Al explorar el directorio de una aplicación, el técnico encuentra un archivo con la extensión .dll. ¿Qué función cumple este componente en el ecosistema del software?",
+                options: [
+                    "Iniciar los procesos principales de la aplicación.",
+                    "Almacenar recursos pesados como audio e imágenes.",
+                    "Proveer funciones compartidas cargadas en la RAM.",
+                    "Registrar trazas de ejecución para la auditoría.",
+                    "Guardar los parámetros de configuración del usuario."
+                ],
+                correctAnswerText: "Proveer funciones compartidas cargadas en la RAM.",
+                justification: "Las DLL (Dynamic Link Libraries) son bibliotecas que contienen funciones compartidas que el sistema utiliza en la memoria RAM."
+            }, {
+                question: "Se debe enviar un conjunto de herramientas técnicas a usuarios remotos que carecen de conocimientos de informática y de software de gestión de archivos. ¿Qué formato es óptimo?",
+                options: [
+                    "Empaquetar los archivos en un contenedor .zip nativo.",
+                    "Comprimir los archivos en un formato .7z de código abierto.",
+                    "Distribuir los archivos mediante un ejecutable SFX.",
+                    "Organizar los archivos en una estructura de ruta relativa.",
+                    "Almacenar los archivos en una imagen de disco .iso lógica."
+                ],
+                correctAnswerText: "Distribuir los archivos mediante un ejecutable SFX.",
+                justification: "El formato SFX (Autoextraíble) es ideal para usuarios sin descompresores instalados, ya que incluye su propio motor de descompresión."
+            }, {
+                question: "Un administrador de sistemas necesita estandarizar los márgenes y fuentes de todos los documentos corporativos mediante GPO. ¿Qué recurso técnico debe utilizar?",
+                options: [
+                    "Configurar los accesos rápidos de cada terminal.",
+                    "Distribuir plantillas con la identidad corporativa.",
+                    "Mapear atajos de teclado para perfiles específicos.",
+                    "Ajustar las preferencias de autoguardado globales.",
+                    "Sincronizar los archivos .log de todas las estaciones."
+                ],
+                correctAnswerText: "Distribuir plantillas con la identidad corporativa.",
+                justification: "Las plantillas (Templates) permiten establecer la identidad corporativa y su distribución masiva se realiza eficientemente mediante GPO."
+            }, {
+                question: "¿Cuál es el principal beneficio ergonómico y cognitivo de implementar 'Ribbons' o cintas en el diseño de una interfaz de software masivo?",
+                options: [
+                    "Facilitar el acceso a los archivos de configuración.",
+                    "Reducir la carga cognitiva al buscar funciones.",
+                    "Aumentar la velocidad de respuesta del procesador.",
+                    "Eliminar la necesidad de usar menús contextuales.",
+                    "Permitir el desacople de herramientas en monitores."
+                ],
+                correctAnswerText: "Reducir la carga cognitiva al buscar funciones.",
+                justification: "Las cintas de opciones utilizan la agrupación lógica de comandos para reducir la carga cognitiva del usuario al navegar por el software."
+            }, {
+                question: "Antes de iniciar la extracción de archivos en una instalación masiva, ¿qué validación técnica es crítica para evitar fallos a mitad del proceso?",
+                options: [
+                    "Verificar la asociación de las extensiones de archivos.",
+                    "Validar el espacio en disco y las dependencias (.NET).",
+                    "Crear los accesos directos en el escritorio del usuario.",
+                    "Configurar los parámetros de red en el archivo .json.",
+                    "Auditar las trazas de ejecución en el archivo de log."
+                ],
+                correctAnswerText: "Validar el espacio en disco y las dependencias (.NET).",
+                justification: "El paso 2 (Requisitos) del pipeline exige verificar RAM, disco y dependencias antes de proceder a la extracción de datos."
+            }, {
+                question: "¿Cuál es el riesgo técnico de realizar una transferencia masiva de datos confiando exclusivamente en el portapapeles (clipboard) del sistema operativo?",
+                options: [
+                    "Los datos sufren una compresión con pérdida excesiva.",
+                    "Los datos se corrompen al cambiar de directorio raíz.",
+                    "Los datos se pierden si el sistema se apaga o reinicia.",
+                    "Los datos bloquean la escritura en la tabla de índices.",
+                    "Los datos requieren una redistribución mediante script."
+                ],
+                correctAnswerText: "Los datos se pierden si el sistema se apaga o reinicia.",
+                justification: "El portapapeles se gestiona en la memoria RAM, por lo tanto es volátil y su contenido se borra al apagar el equipo."
+            }, {
+                question: "Un diseñador gráfico requiere que sus herramientas más usadas estén siempre disponibles sin navegar por menús. ¿Qué técnica de personalización es la más eficiente?",
+                options: [
+                    "Editar el archivo .cfg de la aplicación manualmente.",
+                    "Fijar comandos diarios en la barra de acceso rápido.",
+                    "Reinstalar el software usando una ruta de tipo relativa.",
+                    "Desactivar el software basura mediante instalación típica.",
+                    "Consultar los errores de interfaz en los archivos de log."
+                ],
+                correctAnswerText: "Fijar comandos diarios en la barra de acceso rápido.",
+                justification: "La barra de acceso rápido permite fijar los comandos de uso diario para ocultar distractores y mejorar la eficiencia."
+            }, {
+                question: "Se está configurando una aplicación web moderna basada en microservicios. ¿Qué formato de archivo de configuración es el estándar actual para esta arquitectura?",
+                options: [
+                    "Utilizar el formato .ini basado en secciones lógicas.",
+                    "Utilizar el formato .xml basado en etiquetas jerárquicas.",
+                    "Utilizar el formato .json basado en llaves y pares.",
+                    "Utilizar el formato .conf basado en estructuras abiertas.",
+                    "Utilizar el formato .bat basado en comandos binarios."
+                ],
+                correctAnswerText: "Utilizar el formato .json basado en llaves y pares.",
+                justification: "El formato .json es el estándar absoluto en el desarrollo y configuración de software moderno y web."
+            }, {
+                question: "Al finalizar una jornada de soporte, un técnico analiza los archivos .log de una aplicación. ¿Qué información técnica está buscando primordialmente?",
+                options: [
+                    "Las funciones compartidas que fueron cargadas en RAM.",
+                    "Los recursos pesados que presentan errores gráficos.",
+                    "Las trazas de ejecución y eventos de auditoría.",
+                    "Las rutas absolutas de los archivos de configuración.",
+                    "Los privilegios de administrador del usuario pasivo."
+                ],
+                correctAnswerText: "Las trazas de ejecución y eventos de auditoría.",
+                justification: "Los archivos .log (y .tmp) se utilizan específicamente para la auditoría de procesos y el rastreo de trazas de ejecución."
+            }, {
+                question: "¿Qué sucede a nivel lógico si un usuario desconecta una unidad USB mientras el sistema está moviendo un archivo de gran tamaño?",
+                options: [
+                    "El sistema duplica los bloques lógicos por seguridad.",
+                    "El sistema detiene la volatilización de la memoria RAM.",
+                    "El sistema corrompe el archivo de forma irremediable.",
+                    "El sistema activa automáticamente el motor de SFX.",
+                    "El sistema redirige la ruta absoluta hacia la relativa."
+                ],
+                correctAnswerText: "El sistema corrompe el archivo de forma irremediable.",
+                justification: "Interrumpir la reescritura del índice (tabla de asignación) al extraer un dispositivo de forma insegura corrompe el archivo."
+            }, {
+                question: "Un técnico necesita supervisar las propiedades avanzadas de un objeto en tiempo real mientras trabaja en un entorno multimonitor. ¿Qué acción de la GUI lo facilita?",
+                options: [
+                    "Colapsar las barras de herramientas para ganar espacio.",
+                    "Desacoplar los paneles de tareas hacia otra pantalla.",
+                    "Mapear atajos de teclado para ocultar los paneles.",
+                    "Consultar el menú contextual en el monitor principal.",
+                    "Ejecutar un script de configuración para fijar la vista."
+                ],
+                correctAnswerText: "Desacoplar los paneles de tareas hacia otra pantalla.",
+                justification: "Los paneles de tareas acoplables pueden desacoplarse, lo cual es ideal para configuraciones multimonitor y monitoreo en tiempo real."
+            }, {
+                question: "¿Cuál es el cambio de paradigma fundamental para pasar de ser un 'usuario pasivo' a un 'técnico activo' en la gestión de software?",
+                options: [
+                    "Aprender a operar el software con su configuración base.",
+                    "Saber solicitar soporte externo ante fallos del sistema.",
+                    "Resolver los problemas técnicos desde su raíz lógica.",
+                    "Memorizar todas las funciones de la interfaz de usuario.",
+                    "Instalar únicamente software comercial de difusión masiva."
+                ],
+                correctAnswerText: "Resolver los problemas técnicos desde su raíz lógica.",
+                justification: "El técnico activo se define por su capacidad de adaptar el entorno, automatizar procesos y resolver problemas de raíz en lugar de depender de terceros."
+            }];
+
+            // ----------------------------------------------
+            // 3. FUNCIONES AUXILIARES (Aleatorización)
+            // ----------------------------------------------
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            // Prepara las preguntas: baraja las opciones y registra el índice correcto
+            function buildShuffledQuestions() {
+                const shuffledQuestions = shuffleArray([...questionBank]);
+                return shuffledQuestions.map(q => {
+                    const shuffledOptions = shuffleArray([...q.options]);
+                    const correctIdx = shuffledOptions.indexOf(q.correctAnswerText);
+                    return {
+                        question: q.question,
+                        options: shuffledOptions,
+                        correctIndex: correctIdx, // índice de la respuesta correcta en el arreglo barajado
+                        justification: q.justification
+                    };
+                });
+            }
+
+            // ----------------------------------------------
+            // 4. ESTADO DE LA APLICACIÓN
+            // ----------------------------------------------
+            let quizQuestions = [];
+            let currentIndex = 0;
+            let userAnswers = []; // { answered: boolean, selectedIndex: number, isCorrect: boolean }
+
+            // Elementos del DOM
+            const quizBody = document.getElementById('quizBody');
+            const resultScreen = document.getElementById('resultScreen');
+            const questionTextEl = document.getElementById('questionText');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const feedbackContainer = document.getElementById('feedbackContainer');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressText = document.getElementById('progressText');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressFill = document.getElementById('progressFill');
+            const restartBtn = document.getElementById('restartBtn');
+            const finalScore = document.getElementById('finalScore');
+            const finalPercent = document.getElementById('finalPercent');
+
+            // ----------------------------------------------
+            // 5. RENDERIZADO DE PREGUNTA ACTUAL
+            // ----------------------------------------------
+            function renderQuestion() {
+                const total = quizQuestions.length;
+                const question = quizQuestions[currentIndex];
+                const answer = userAnswers[currentIndex];
+
+                // Texto de la pregunta
+                questionTextEl.textContent = question.question;
+
+                // Construir botones de opciones
+                const letters = ['A', 'B', 'C', 'D', 'E'];
+                let optionsHTML = '';
+                question.options.forEach((opt, idx) => {
+                    let btnClass = 'option-btn';
+                    let disabledAttr = '';
+                    if (answer && answer.answered) {
+                        disabledAttr = 'disabled';
+                        btnClass += ' disabled-option';
+                        if (idx === answer.selectedIndex) {
+                            btnClass += answer.isCorrect ? ' correct-choice' : ' wrong-choice';
+                        }
+                        // Si la opción seleccionada fue incorrecta, también resaltamos la correcta (verde)
+                        if (answer && !answer.isCorrect && idx === question.correctIndex) {
+                            btnClass += ' correct-choice';
+                        }
+                    }
+                    optionsHTML += `
+                        <button class="${btnClass}" data-option-index="${idx}" ${disabledAttr}>
+                            <span class="option-letter">${letters[idx]}</span>
+                            <span>${opt}</span>
+                        </button>
+                    `;
+                });
+                optionsContainer.innerHTML = optionsHTML;
+
+                // Panel de retroalimentación
+                if (answer && answer.answered) {
+                    let feedbackHtml = '';
+                    if (answer.isCorrect) {
+                        feedbackHtml = `<div class="feedback-panel"><strong>✅ ¡Correcto!</strong><br>${question.justification}</div>`;
+                    } else {
+                        const correctText = question.options[question.correctIndex];
+                        feedbackHtml = `<div class="feedback-panel"><strong>❌ Incorrecto.</strong> La respuesta correcta es: <strong>${correctText}</strong><br>${question.justification}</div>`;
+                    }
+                    feedbackContainer.innerHTML = feedbackHtml;
+                    feedbackContainer.classList.remove('hidden');
+                } else {
+                    feedbackContainer.innerHTML = '';
+                    feedbackContainer.classList.add('hidden');
+                }
+
+                // Actualizar barra de progreso
+                const answeredCount = userAnswers.filter(a => a.answered).length;
+                const percent = Math.round((answeredCount / total) * 100);
+                progressText.textContent = `Pregunta ${currentIndex + 1} de ${total}`;
+                progressPercent.textContent = `${percent}%`;
+                progressFill.style.width = `${percent}%`;
+
+                // Botones de navegación
+                prevBtn.disabled = (currentIndex === 0);
+                if (currentIndex === total - 1) {
+                    nextBtn.textContent = 'Finalizar ✓';
+                    nextBtn.classList.add('primary');
+                } else {
+                    nextBtn.textContent = 'Siguiente →';
+                    nextBtn.classList.add('primary');
+                }
+            }
+
+            // ----------------------------------------------
+            // 6. MANEJO DE SELECCIÓN DE OPCIÓN
+            // ----------------------------------------------
+            function handleOptionClick(e) {
+                const button = e.target.closest('.option-btn');
+                if (!button) return;
+                if (userAnswers[currentIndex].answered) return; // ya respondida
+
+                const selectedIdx = parseInt(button.getAttribute('data-option-index'), 10);
+                const question = quizQuestions[currentIndex];
+                const isCorrect = (selectedIdx === question.correctIndex);
+
+                // Registrar respuesta
+                userAnswers[currentIndex] = {
+                    answered: true,
+                    selectedIndex: selectedIdx,
+                    isCorrect: isCorrect
+                };
+
+                // Re-renderizar pregunta (muestra feedback y estilos)
+                renderQuestion();
+            }
+
+            // ----------------------------------------------
+            // 7. NAVEGACIÓN ENTRE PREGUNTAS
+            // ----------------------------------------------
+            function goToPrevious() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    renderQuestion();
+                }
+            }
+
+            function goToNext() {
+                const total = quizQuestions.length;
+                if (currentIndex < total - 1) {
+                    currentIndex++;
+                    renderQuestion();
+                } else if (currentIndex === total - 1) {
+                    // Finalizar cuestionario
+                    showFinalResults();
+                }
+            }
+
+            // ----------------------------------------------
+            // 8. MOSTRAR RESULTADOS FINALES
+            // ----------------------------------------------
+            function showFinalResults() {
+                const total = quizQuestions.length;
+                const correctCount = userAnswers.filter(a => a.isCorrect).length;
+                const percentage = Math.round((correctCount / total) * 100);
+
+                finalScore.textContent = `${correctCount} / ${total}`;
+                finalPercent.textContent = `${percentage}% de aciertos`;
+
+                quizBody.classList.add('hidden');
+                resultScreen.classList.add('active');
+            }
+
+            function restartQuiz() {
+                // Reiniciar: volver a cargar la página para nueva aleatorización
+                window.location.reload();
+            }
+
+            // ----------------------------------------------
+            // 9. INICIALIZACIÓN
+            // ----------------------------------------------
+            function initQuiz() {
+                quizQuestions = buildShuffledQuestions();
+                userAnswers = new Array(quizQuestions.length).fill(null).map(() => ({
+                    answered: false,
+                    selectedIndex: null,
+                    isCorrect: false
+                }));
+                currentIndex = 0;
+                quizBody.classList.remove('hidden');
+                resultScreen.classList.remove('active');
+                renderQuestion();
+            }
+
+            // Event listeners
+            optionsContainer.addEventListener('click', handleOptionClick);
+            prevBtn.addEventListener('click', goToPrevious);
+            nextBtn.addEventListener('click', goToNext);
+            restartBtn.addEventListener('click', restartQuiz);
+
+            // Arranque
+            initQuiz();
+        })();
+    </script>
+</body>
+</html>
